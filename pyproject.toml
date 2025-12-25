@@ -1,0 +1,25 @@
+[project]
+name = "NiceGui-UGForm"
+version = "1.0.0"
+description = "User Generated Form Component for NiceGUI Framework"
+authors = [
+    {name = "Harry Huang",email = "harryhuang2652@qq.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.9,<4"
+dependencies = [
+    "nicegui (>=3.0,<4)",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+
+[project.urls]
+Repository = "https://github.com/isHarryh/NiceGUI-UGForm"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
