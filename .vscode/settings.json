@@ -1,0 +1,6 @@
+{
+    "black-formatter.args": [ "-l", "120" ],
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "python.analysis.typeCheckingMode": "standard"
+}
