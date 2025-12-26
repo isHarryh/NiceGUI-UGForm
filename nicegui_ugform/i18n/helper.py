@@ -48,7 +48,7 @@ class I18nHelper:
 
     def _detect_locale(self) -> str:
         try:
-            system_locale = locale.getdefaultlocale()[0]
+            system_locale = locale.getlocale()[0]
             if system_locale:
                 # Convert 'zh_CN' to our supported format
                 if system_locale.startswith("zh"):
