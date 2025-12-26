@@ -1,7 +1,7 @@
 """Field classes for form construction."""
 
 from abc import ABC, abstractmethod
-from typing import Generic, Optional, TypeVar
+from typing import Any, Generic, Optional, TypeVar
 import re
 
 
@@ -49,6 +49,7 @@ class BaseFormField(BaseFormNode, Generic[T], ABC):
 
     def set_value(self, value: Optional[T]) -> None:
         """Sets the current value of the field.
+        No validation will be performed here.
 
         Args:
             value: The value to set.
@@ -57,6 +58,7 @@ class BaseFormField(BaseFormNode, Generic[T], ABC):
 
     def get_value(self) -> Optional[T]:
         """Gets the current value of the field.
+        No guarantee is made that the value is valid.
 
         Returns:
             The current value of the field.
@@ -64,7 +66,7 @@ class BaseFormField(BaseFormNode, Generic[T], ABC):
         return self.current_value
 
     @abstractmethod
-    def validate(self, value: T) -> bool:
+    def validate(self, value: Any) -> bool:
         """Validates the given value.
 
         Args:
@@ -73,7 +75,7 @@ class BaseFormField(BaseFormNode, Generic[T], ABC):
         Returns:
             True if the value is valid, False otherwise.
         """
-        pass
+        raise NotImplementedError()
 
     def to_dict(self) -> dict:
         """Converts the field to a dictionary representation.
@@ -125,15 +127,7 @@ class TextField(BaseFormField[str]):
         self.max_length = max_length
         self.regex = regex
 
-    def validate(self, value: str) -> bool:
-        """Validates the given string value.
-
-        Args:
-            value: The string value to validate.
-
-        Returns:
-            True if the value is valid, False otherwise.
-        """
+    def validate(self, value: Any) -> bool:
         if value is None:
             return not self.required
 
@@ -153,11 +147,6 @@ class TextField(BaseFormField[str]):
         return True
 
     def to_dict(self) -> dict:
-        """Converts the field to a dictionary representation.
-
-        Returns:
-            Dictionary containing field configuration.
-        """
         result = super().to_dict()
         if self.min_length is not None:
             result["min_length"] = self.min_length
@@ -196,15 +185,7 @@ class FloatField(BaseFormField[float]):
         self.min_value = min_value
         self.max_value = max_value
 
-    def validate(self, value: float) -> bool:
-        """Validates the given float value.
-
-        Args:
-            value: The float value to validate.
-
-        Returns:
-            True if the value is valid, False otherwise.
-        """
+    def validate(self, value: Any) -> bool:
         if value is None:
             return not self.required
 
@@ -222,11 +203,6 @@ class FloatField(BaseFormField[float]):
         return True
 
     def to_dict(self) -> dict:
-        """Converts the field to a dictionary representation.
-
-        Returns:
-            Dictionary containing field configuration.
-        """
         result = super().to_dict()
         if self.min_value is not None:
             result["min_value"] = self.min_value
@@ -263,15 +239,7 @@ class IntegerField(BaseFormField[int]):
         self.min_value = min_value
         self.max_value = max_value
 
-    def validate(self, value: int) -> bool:
-        """Validates the given integer value.
-
-        Args:
-            value: The integer value to validate.
-
-        Returns:
-            True if the value is valid, False otherwise.
-        """
+    def validate(self, value: Any) -> bool:
         if value is None:
             return not self.required
 
@@ -287,11 +255,6 @@ class IntegerField(BaseFormField[int]):
         return True
 
     def to_dict(self) -> dict:
-        """Converts the field to a dictionary representation.
-
-        Returns:
-            Dictionary containing field configuration.
-        """
         result = super().to_dict()
         if self.min_value is not None:
             result["min_value"] = self.min_value
@@ -322,15 +285,7 @@ class BooleanField(BaseFormField[bool]):
         """
         super().__init__(name, label, description, required, default_value)
 
-    def validate(self, value: bool) -> bool:
-        """Validates the given boolean value.
-
-        Args:
-            value: The boolean value to validate.
-
-        Returns:
-            True if the value is valid, False otherwise.
-        """
+    def validate(self, value: Any) -> bool:
         if value is None:
             return not self.required
 
