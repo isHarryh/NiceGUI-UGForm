@@ -1,6 +1,7 @@
 """Form display component for rendering and submitting forms."""
 
-from typing import Callable, Optional
+import inspect
+from typing import Awaitable, Callable, Optional, Union
 
 from nicegui import ui
 
@@ -18,12 +19,17 @@ from ..i18n.helper import I18nHelper
 class FormDisplay:
     """Component for displaying and submitting forms."""
 
-    def __init__(self, form: Form, on_submit: Optional[Callable] = None, locale: Optional[str] = None):
+    def __init__(
+        self,
+        form: Form,
+        on_submit: Optional[Union[Callable[[], None], Callable[[], Awaitable[None]]]] = None,
+        locale: Optional[str] = None,
+    ):
         """Initializes the form display.
 
         Args:
             form: The form to display.
-            on_submit: Optional callback when form is submitted.
+            on_submit: Optional callback (sync or async) when form is submitted.
             locale: The locale code (e.g., 'en', 'zh_cn'). If None, uses form.locale or auto-detects from system.
         """
         self.form = form
@@ -33,11 +39,11 @@ class FormDisplay:
         display_locale = locale or form.locale
         self._t = I18nHelper(display_locale).translations
 
-    def set_on_submit(self, callback: Callable) -> None:
+    def set_on_submit(self, callback: Union[Callable[[], None], Callable[[], Awaitable[None]]]) -> None:
         """Sets the callback for when the form is submitted.
 
         Args:
-            callback: The callback function to set.
+            callback: The callback function (sync or async) to set.
         """
         self.on_submit = callback
 
@@ -58,7 +64,7 @@ class FormDisplay:
             # Buttons
             with ui.row().classes("w-full justify-end gap-2 mt-6"):
 
-                def submit_form():
+                async def submit_form():
                     """Submits the form after validation."""
                     # Update field values from inputs
                     for field_name, input_elem in self._input_elements.items():
@@ -86,9 +92,12 @@ class FormDisplay:
 
                     # Validate
                     if self.form.validate():
-                        ui.notify(self._t.formSubmittedSuccessfully, type="positive")
                         if self.on_submit:
-                            self.on_submit()
+                            if inspect.iscoroutinefunction(self.on_submit):
+                                await self.on_submit()
+                            else:
+                                self.on_submit()
+                            ui.notify(self._t.formSubmittedSuccessfully, type="positive")
                     else:
                         ui.notify(self._t.pleaseFixValidationErrors, type="negative")
                         self._show_validation_errors()

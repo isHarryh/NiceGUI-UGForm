@@ -1,7 +1,8 @@
 """Form editor component for creating and configuring forms."""
 
 import copy
-from typing import Callable, NamedTuple, Optional
+import inspect
+from typing import Awaitable, Callable, NamedTuple, Optional, Union
 
 from nicegui import ui
 
@@ -26,12 +27,17 @@ class FieldTypeInfo(NamedTuple):
 class FormEditor:
     """Component for editing form structure and configuration."""
 
-    def __init__(self, form: Form, on_complete: Optional[Callable] = None, editor_locale: Optional[str] = None):
+    def __init__(
+        self,
+        form: Form,
+        on_complete: Optional[Union[Callable[[], None], Callable[[], Awaitable[None]]]] = None,
+        editor_locale: Optional[str] = None,
+    ):
         """Initializes the form editor.
 
         Args:
             form: The form to edit.
-            on_complete: Optional callback when editing is complete.
+            on_complete: Optional callback (sync or async) when editing is complete.
             editor_locale: The locale code (e.g., 'en', 'zh_cn'). If None, auto-detects from system.
         """
         self.form = form
@@ -44,11 +50,11 @@ class FormEditor:
             self._t.boolean: FieldTypeInfo(BooleanField, "check_box"),
         }
 
-    def set_on_complete(self, callback: Callable) -> None:
+    def set_on_complete(self, callback: Union[Callable[[], None], Callable[[], Awaitable[None]]]) -> None:
         """Sets the callback for when editing is complete.
 
         Args:
-            callback: The callback function to set.
+            callback: The callback function (sync or async) to set.
         """
         self.on_complete = callback
 
@@ -160,8 +166,14 @@ class FormEditor:
                     ui.button(self._t.exportJson, on_click=export_schema, icon="data_object", color="secondary")
                     ui.button(self._t.exportBase64, on_click=export_schema_b64, icon="code", color="secondary")
 
-                if self.on_complete:
-                    ui.button(self._t.complete, on_click=self.on_complete, icon="check")
+                    async def handle_complete():
+                        if self.on_complete:
+                            if inspect.iscoroutinefunction(self.on_complete):
+                                await self.on_complete()
+                            else:
+                                self.on_complete()
+
+                    ui.button(self._t.complete, on_click=handle_complete, icon="check")
 
     def _move_field(self, index: int, direction: int, refresh_callback: Callable) -> None:
         new_index = index + direction

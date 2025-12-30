@@ -1,5 +1,6 @@
 """Test script demonstrating the form editor and form display components."""
 
+import asyncio
 from nicegui import ui
 
 from nicegui_ugform import BooleanField, FloatField, Form, FormDisplay, FormEditor, IntegerField, TextField, __version__
@@ -86,9 +87,15 @@ def main():
     @ui.page("/editor")
     def editor_page():
         """Form editor page."""
+
+        async def on_complete():
+            ui.notify("Processing...", type="info")
+            await asyncio.sleep(1)
+            ui.notify("Form editing completed!", type="positive")
+
         menu()
         editor = FormEditor(form, editor_locale="en")
-        editor.set_on_complete(lambda: ui.notify("Form editing completed!", type="positive"))
+        editor.set_on_complete(on_complete)
         editor.render()
 
     @ui.page("/display")
@@ -98,19 +105,23 @@ def main():
 
         with ui.column().classes("w-full gap-4"):
 
-            def on_submit():
-                """Handles form submission."""
+            async def on_submit():
                 data = form.dump_data()
                 globals()["last_submission_data"] = data
                 print("Form submitted:", data)
                 result_editor.properties["content"]["json"].update(data)
+                ui.notify("Submitting...", type="info")
+                await asyncio.sleep(1)
+                ui.notify("Submitted!", type="positive")
 
             display = FormDisplay(form, on_submit=on_submit)
             display.render()
 
             # Result display (initially hidden)
-            with ui.card().classes("w-full max-w-2xl mx-auto mb-4").bind_visibility_from(
-                globals(), "last_submission_data", backward=lambda x: x is not None
+            with (
+                ui.card()
+                .classes("w-full max-w-2xl mx-auto mb-4")
+                .bind_visibility_from(globals(), "last_submission_data", backward=lambda x: x is not None)
             ):
                 ui.label("Submission Result").classes("text-xl font-bold mb-2")
                 result_editor = ui.json_editor({"content": {"json": {}}}).classes("w-full")
