@@ -43,6 +43,16 @@ class TranslationMap(NamedTuple):
     minValue: str
     maxValue: str
 
+    # Validation messages
+    requiredField: str
+    invalidTypeTemplate: str
+    invalidValueTemplate: str
+    tooShortTemplate: str
+    tooLongTemplate: str
+    regexPatternMismatch: str
+    tooSmallTemplate: str
+    tooLargeTemplate: str
+
     # Template texts
     newFieldTemplate: str
 

@@ -21,23 +21,23 @@ class TestTextField:
 
     def test_required_validation(self):
         field = TextField(name="username", label="Test", required=True)
-        assert not field.validate(None)
-        assert field.validate("hello")
+        assert not field.is_validated(None)
+        assert field.is_validated("hello")
 
     def test_min_max_length_validation(self):
         field = TextField(name="username", label="Test", min_length=3, max_length=5)
-        assert not field.validate("")
-        assert not field.validate("ab")
-        assert field.validate("abc")
-        assert field.validate("abcd")
-        assert field.validate("abcde")
-        assert not field.validate("abcdef")
+        assert not field.is_validated("")
+        assert not field.is_validated("ab")
+        assert field.is_validated("abc")
+        assert field.is_validated("abcd")
+        assert field.is_validated("abcde")
+        assert not field.is_validated("abcdef")
 
     def test_regex_validation(self):
         field = TextField(name="email", label="Email", regex=r"^[a-z]+@[a-z]+\.[a-z]+$")
-        assert field.validate("test@example.com")
-        assert not field.validate("invalid-email")
-        assert not field.validate("test@")
+        assert field.is_validated("test@example.com")
+        assert not field.is_validated("invalid-email")
+        assert not field.is_validated("test@")
 
     def test_to_dict(self):
         field = TextField(
@@ -71,24 +71,24 @@ class TestIntegerField:
     def test_common_validation(self):
         """Test integer validation with different value types."""
         field = IntegerField(name="age", label="Age")
-        assert field.validate(None)
-        assert field.validate(25)
-        assert not field.validate("not a number")
-        assert not field.validate(25.5)
+        assert field.is_validated(None)
+        assert field.is_validated(25)
+        assert not field.is_validated("not a number")
+        assert not field.is_validated(25.5)
 
     def test_required_validation(self):
         """Test required field validation."""
         field = IntegerField(name="age", label="Age", required=True)
-        assert not field.validate(None)
-        assert field.validate(25)
+        assert not field.is_validated(None)
+        assert field.is_validated(25)
 
     def test_min_max_value_validation(self):
         field = IntegerField(name="age", label="Age", min_value=18, max_value=120)
-        assert not field.validate(17)
-        assert field.validate(18)
-        assert field.validate(100)
-        assert field.validate(120)
-        assert not field.validate(121)
+        assert not field.is_validated(17)
+        assert field.is_validated(18)
+        assert field.is_validated(100)
+        assert field.is_validated(120)
+        assert not field.is_validated(121)
 
     def test_to_dict(self):
         field = IntegerField(name="age", label="Age", min_value=18, max_value=120)
@@ -108,18 +108,18 @@ class TestFloatField:
 
     def test_validation(self):
         field = FloatField(name="height", label="Height")
-        assert field.validate(None)
-        assert field.validate(1.75)
-        assert field.validate(2)  # int is acceptable
-        assert not field.validate("not a number")
+        assert field.is_validated(None)
+        assert field.is_validated(1.75)
+        assert field.is_validated(2)  # int is acceptable
+        assert not field.is_validated("not a number")
 
     def test_min_max_value_validation(self):
         field = FloatField(name="height", label="Height", min_value=0.5, max_value=3.0)
-        assert not field.validate(0.4)
-        assert field.validate(0.5)
-        assert field.validate(2.0)
-        assert field.validate(3.0)
-        assert not field.validate(3.1)
+        assert not field.is_validated(0.4)
+        assert field.is_validated(0.5)
+        assert field.is_validated(2.0)
+        assert field.is_validated(3.0)
+        assert not field.is_validated(3.1)
 
     def test_to_dict(self):
         field = FloatField(name="height", label="Height", min_value=0.0, max_value=3.0)
@@ -139,9 +139,9 @@ class TestBooleanField:
 
     def test_validation(self):
         field = BooleanField(name="subscribe", label="Subscribe")
-        assert field.validate(None)
-        assert field.validate(True)
-        assert field.validate(False)
+        assert field.is_validated(None)
+        assert field.is_validated(True)
+        assert field.is_validated(False)
 
     def test_default_value(self):
         field = BooleanField(name="subscribe", label="Subscribe", default_value=True)

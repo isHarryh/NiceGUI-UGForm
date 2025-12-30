@@ -1,7 +1,7 @@
 """Form display component for rendering and submitting forms."""
 
 import inspect
-from typing import Awaitable, Callable, Optional, Union
+from typing import Any, Awaitable, Callable, Optional, Tuple, Union
 
 from nicegui import ui
 
@@ -11,6 +11,7 @@ from ..core.fields import (
     FloatField,
     IntegerField,
     TextField,
+    ValidationResultType,
 )
 from ..core.form import Form
 from ..i18n.helper import I18nHelper
@@ -66,41 +67,44 @@ class FormDisplay:
 
                 async def submit_form():
                     """Submits the form after validation."""
-                    # Update field values from inputs
+                    # Trigger validation for all input fields and collect normalized values
+                    has_errors = False
+                    pending_values = {}
                     for field_name, input_elem in self._input_elements.items():
                         field = self.form.get_field(field_name)
-                        if field and isinstance(field, BaseFormField):
-                            value = input_elem.value
-                            # Convert value based on field type
-                            if isinstance(field, IntegerField):
-                                try:
-                                    value = int(value) if value is not None and str(value).strip() != "" else None
-                                    field.set_value(value)
-                                except (ValueError, TypeError):
-                                    field.set_value(None)
-                            elif isinstance(field, FloatField):
-                                try:
-                                    value = float(value) if value is not None and str(value).strip() != "" else None
-                                    field.set_value(value)
-                                except (ValueError, TypeError):
-                                    field.set_value(None)
-                            elif isinstance(field, BooleanField):
-                                value = bool(value)
-                                field.set_value(value)
-                            else:  # TextField and others
-                                field.set_value(value)
+                        if not field or not isinstance(field, BaseFormField):
+                            continue
 
-                    # Validate
-                    if self.form.validate():
-                        if self.on_submit:
-                            if inspect.iscoroutinefunction(self.on_submit):
-                                await self.on_submit()
-                            else:
-                                self.on_submit()
-                            ui.notify(self._t.formSubmittedSuccessfully, type="positive")
-                    else:
+                        # Normalize once so we reuse for assignment after validation
+                        normalized_ok, normalized_value = self._normalize_input(field, input_elem.value)
+                        pending_values[field_name] = normalized_value
+
+                        if hasattr(input_elem, "validate"):
+                            result = input_elem.validate()
+                            if result is False:
+                                has_errors = True
+
+                        # If normalization already failed, mark error
+                        if not normalized_ok:
+                            has_errors = True
+
+                    if has_errors:
                         ui.notify(self._t.pleaseFixValidationErrors, type="negative")
-                        self._show_validation_errors()
+                        return
+
+                    # Update field values from normalized inputs
+                    for field_name, value in pending_values.items():
+                        field = self.form.get_field(field_name)
+                        if field and isinstance(field, BaseFormField):
+                            field.set_value(value)
+
+                    # Call submit callback
+                    if self.on_submit:
+                        if inspect.iscoroutinefunction(self.on_submit):
+                            await self.on_submit()
+                        else:
+                            self.on_submit()
+                    ui.notify(self._t.formSubmittedSuccessfully, type="positive")
 
                 def reset_form():
                     """Resets the form to default values."""
@@ -132,6 +136,7 @@ class FormDisplay:
                 label=label_text,
                 placeholder=field.description or "",
                 value=field.get_value() or field.default_value or "",
+                validation=lambda value, f=field: self._validate_internal(f, value),
             ).classes("w-full")
 
             if field.max_length:
@@ -145,6 +150,7 @@ class FormDisplay:
                 placeholder=field.description or "",
                 value=field.get_value() or field.default_value,
                 format="%.0f",
+                validation=lambda value, f=field: self._validate_internal(f, value),
             ).classes("w-full")
 
             if field.min_value is not None:
@@ -160,6 +166,7 @@ class FormDisplay:
                 placeholder=field.description or "",
                 value=field.get_value() or field.default_value,
                 format="%.2f",
+                validation=lambda value, f=field: self._validate_internal(f, value),
             ).classes("w-full")
 
             if field.min_value is not None:
@@ -177,11 +184,71 @@ class FormDisplay:
 
             self._input_elements[field.name] = input_elem
 
-    def _show_validation_errors(self) -> None:
-        for field in self.form.fields:
-            if isinstance(field, BaseFormField):
-                value = field.get_value()
-                if field.required and value is None:
-                    ui.notify(self._t.fieldRequiredTemplate.format(field.label), type="warning")
-                elif value is not None and not field.validate(value):
-                    ui.notify(self._t.fieldInvalidValueTemplate.format(field.label), type="warning")
+    def _validate_internal(self, field: BaseFormField, raw_value: Any) -> Optional[str]:
+        normalized_ok, normalized_value = self._normalize_input(field, raw_value)
+        if not normalized_ok:
+            return self._t.invalidTypeTemplate.format(field.label)
+
+        result = field.validate(normalized_value)
+        return self._convert_validation_message(result, field)
+
+    def _normalize_input(self, field: BaseFormField, raw_value: Any) -> Tuple[bool, Any]:
+        if isinstance(field, IntegerField):
+            if raw_value is None or str(raw_value).strip() == "":
+                return True, None
+            try:
+                return True, int(raw_value)
+            except (ValueError, TypeError):
+                return False, None
+
+        if isinstance(field, FloatField):
+            if raw_value is None or str(raw_value).strip() == "":
+                return True, None
+            try:
+                return True, float(raw_value)
+            except (ValueError, TypeError):
+                return False, None
+
+        if isinstance(field, BooleanField):
+            if raw_value is None:
+                return True, None
+            return True, bool(raw_value)
+
+        # Text and other fields: keep as-is
+        return True, raw_value
+
+    def _convert_validation_message(
+        self, result: ValidationResultType, field: Optional[BaseFormField] = None
+    ) -> Optional[str]:
+        if result == ValidationResultType.okay:
+            return None
+
+        if result == ValidationResultType.invalid_type:
+            return self._t.invalidTypeTemplate.format(field.label if field else "")
+
+        if result == ValidationResultType.required_missing:
+            return self._t.requiredField
+
+        if result == ValidationResultType.too_short and isinstance(field, TextField):
+            if field.min_length is not None:
+                return self._t.tooShortTemplate.format(field.min_length)
+
+        if result == ValidationResultType.to_long and isinstance(field, TextField):
+            if field.max_length is not None:
+                return self._t.tooLongTemplate.format(field.max_length)
+
+        if result == ValidationResultType.regex_mismatch:
+            return self._t.regexPatternMismatch
+
+        if result == ValidationResultType.too_small and isinstance(field, (IntegerField, FloatField)):
+            min_val = getattr(field, "min_value", None)
+            if min_val is not None:
+                return self._t.tooSmallTemplate.format(min_val)
+
+        if result == ValidationResultType.too_large and isinstance(field, (IntegerField, FloatField)):
+            max_val = getattr(field, "max_value", None)
+            if max_val is not None:
+                return self._t.tooLargeTemplate.format(max_val)
+
+        # Fallback
+        return self._t.invalidValueTemplate.format(field.label if field else "")

@@ -1,8 +1,20 @@
 """Field classes for form construction."""
 
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import Any, Generic, Optional, TypeVar
 import re
+
+
+class ValidationResultType(Enum):
+    okay = 0
+    required_missing = 1
+    too_short = 2
+    to_long = 3
+    regex_mismatch = 4
+    too_small = 5
+    too_large = 6
+    invalid_type = 7
 
 
 class BaseFormNode(ABC):
@@ -66,7 +78,18 @@ class BaseFormField(BaseFormNode, Generic[T], ABC):
         return self.current_value
 
     @abstractmethod
-    def validate(self, value: Any) -> bool:
+    def validate(self, value: Any) -> ValidationResultType:
+        """Validates the given value and returns a detailed result.
+
+        Args:
+            value: The value to validate.
+
+        Returns:
+            A ValidationResultType indicating the validation status.
+        """
+        raise NotImplementedError()
+
+    def is_validated(self, value: Any) -> bool:
         """Validates the given value.
 
         Args:
@@ -75,7 +98,7 @@ class BaseFormField(BaseFormNode, Generic[T], ABC):
         Returns:
             True if the value is valid, False otherwise.
         """
-        raise NotImplementedError()
+        return self.validate(value) == ValidationResultType.okay
 
     def to_dict(self) -> dict:
         """Converts the field to a dictionary representation.
@@ -127,24 +150,24 @@ class TextField(BaseFormField[str]):
         self.max_length = max_length
         self.regex = regex
 
-    def validate(self, value: Any) -> bool:
+    def validate(self, value: Any) -> ValidationResultType:
         if value is None:
-            return not self.required
+            return ValidationResultType.okay if not self.required else ValidationResultType.required_missing
 
         if not isinstance(value, str):
-            return False
+            return ValidationResultType.invalid_type
 
         if self.min_length is not None and len(value) < self.min_length:
-            return False
+            return ValidationResultType.too_short
 
         if self.max_length is not None and len(value) > self.max_length:
-            return False
+            return ValidationResultType.to_long
 
         if self.regex is not None:
             if not re.match(self.regex, value):
-                return False
+                return ValidationResultType.regex_mismatch
 
-        return True
+        return ValidationResultType.okay
 
     def to_dict(self) -> dict:
         result = super().to_dict()
@@ -185,22 +208,22 @@ class FloatField(BaseFormField[float]):
         self.min_value = min_value
         self.max_value = max_value
 
-    def validate(self, value: Any) -> bool:
+    def validate(self, value: Any) -> ValidationResultType:
         if value is None:
-            return not self.required
+            return ValidationResultType.okay if not self.required else ValidationResultType.required_missing
 
         if not isinstance(value, (int, float)):
-            return False
+            return ValidationResultType.invalid_type
 
         value = float(value)
 
         if self.min_value is not None and value < self.min_value:
-            return False
+            return ValidationResultType.too_small
 
         if self.max_value is not None and value > self.max_value:
-            return False
+            return ValidationResultType.too_large
 
-        return True
+        return ValidationResultType.okay
 
     def to_dict(self) -> dict:
         result = super().to_dict()
@@ -239,20 +262,20 @@ class IntegerField(BaseFormField[int]):
         self.min_value = min_value
         self.max_value = max_value
 
-    def validate(self, value: Any) -> bool:
+    def validate(self, value: Any) -> ValidationResultType:
         if value is None:
-            return not self.required
+            return ValidationResultType.okay if not self.required else ValidationResultType.required_missing
 
         if not isinstance(value, int) or isinstance(value, bool):
-            return False
+            return ValidationResultType.invalid_type
 
         if self.min_value is not None and value < self.min_value:
-            return False
+            return ValidationResultType.too_small
 
         if self.max_value is not None and value > self.max_value:
-            return False
+            return ValidationResultType.too_large
 
-        return True
+        return ValidationResultType.okay
 
     def to_dict(self) -> dict:
         result = super().to_dict()
@@ -285,8 +308,11 @@ class BooleanField(BaseFormField[bool]):
         """
         super().__init__(name, label, description, required, default_value)
 
-    def validate(self, value: Any) -> bool:
+    def validate(self, value: Any) -> ValidationResultType:
         if value is None:
-            return not self.required
+            return ValidationResultType.okay if not self.required else ValidationResultType.required_missing
 
-        return isinstance(value, bool)
+        if isinstance(value, bool):
+            return ValidationResultType.okay
+
+        return ValidationResultType.invalid_type

@@ -85,7 +85,7 @@ class Form:
                 value = field.get_value()
                 if field.required and value is None:
                     return False
-                if value is not None and not field.validate(value):
+                if value is not None and not field.is_validated(value):
                     return False
         return True
 
