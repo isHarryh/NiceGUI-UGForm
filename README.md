@@ -34,6 +34,10 @@ See [demo.py](demo.py) for a complete example about what can it do.
 | :--------------------------------------------: | :----------------------------------------------: |
 | ![Form Editor Demo](docs/imgs/demo_editor.png) | ![Form Display Demo](docs/imgs/demo_display.png) |
 
+### Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) to understand the changes of every release version.
+
 ## Get Started
 
 ### Installation
