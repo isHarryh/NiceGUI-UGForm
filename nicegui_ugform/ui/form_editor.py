@@ -100,6 +100,19 @@ class FormEditor:
                     on_change=lambda e: setattr(self.form, "locale", locale_options.get(e.value)),
                 ).classes("w-full")
 
+                # Button visibility controls
+                with ui.row().classes("gap-4 mt-2"):
+                    ui.checkbox(
+                        text=self._t.showResetButton,
+                        value=self.form.show_reset_button,
+                        on_change=lambda e: setattr(self.form, "show_reset_button", e.value),
+                    )
+                    ui.checkbox(
+                        text=self._t.showSubmitButton,
+                        value=self.form.show_submit_button,
+                        on_change=lambda e: setattr(self.form, "show_submit_button", e.value),
+                    )
+
                 ui.label(f"{self._t.uuid}: {self.form.uuid}").classes("text-sm text-gray-500")
 
             # Fields editor

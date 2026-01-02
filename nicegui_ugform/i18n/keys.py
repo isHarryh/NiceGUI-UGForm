@@ -35,6 +35,8 @@ class TranslationMap(NamedTuple):
     formTitle: str
     formLocale: str
     uuid: str
+    showResetButton: str
+    showSubmitButton: str
 
     # Field-specific properties
     minLength: str

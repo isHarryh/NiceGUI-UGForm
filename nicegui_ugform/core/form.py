@@ -28,6 +28,8 @@ class Form:
         fields: Optional[List[BaseFormNode]] = None,
         form_uuid: Optional[str] = None,
         locale: Optional[str] = None,
+        show_reset_button: bool = True,
+        show_submit_button: bool = True,
     ):
         """Initializes the form.
 
@@ -37,11 +39,15 @@ class Form:
             fields: List of form fields.
             form_uuid: Optional UUID for the form. If not provided, generates one.
             locale: The locale code for form display (e.g., 'en', 'zh_cn').
+            show_reset_button: Whether to show the reset button (default: True).
+            show_submit_button: Whether to show the submit button (default: True).
         """
         self.uuid = form_uuid or str(uuid.uuid4())
         self.title = title
         self.description = description
         self.locale = locale
+        self.show_reset_button = show_reset_button
+        self.show_submit_button = show_submit_button
         self.fields: List[BaseFormNode] = fields or []
 
     def add_field(self, field: BaseFormNode) -> None:
@@ -116,7 +122,13 @@ class Form:
         Returns:
             Dictionary containing form schema.
         """
-        schema = {"uuid": self.uuid, "title": self.title, "fields": []}
+        schema = {
+            "uuid": self.uuid,
+            "title": self.title,
+            "fields": [],
+            "show_reset_button": self.show_reset_button,
+            "show_submit_button": self.show_submit_button,
+        }
 
         if self.description:
             schema["description"] = self.description
@@ -187,6 +199,8 @@ class Form:
             description=schema.get("description"),
             form_uuid=schema.get("uuid"),
             locale=schema.get("locale"),
+            show_reset_button=schema.get("show_reset_button", True),
+            show_submit_button=schema.get("show_submit_button", True),
         )
 
         field_map = {

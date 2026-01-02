@@ -123,8 +123,10 @@ class FormDisplay:
 
                     ui.notify(self._t.formReset, type="info")
 
-                ui.button(self._t.reset, on_click=reset_form, icon="refresh", color="warning")
-                ui.button(self._t.submit, on_click=submit_form, icon="send", color="primary")
+                if self.form.show_reset_button:
+                    ui.button(self._t.reset, on_click=reset_form, icon="refresh", color="warning")
+                if self.form.show_submit_button:
+                    ui.button(self._t.submit, on_click=submit_form, icon="send", color="primary")
 
     def _render_field(self, field: BaseFormField) -> None:
         label_text = field.label
