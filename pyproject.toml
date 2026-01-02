@@ -1,6 +1,6 @@
 [project]
 name = "NiceGui-UGForm"
-version = "1.0.1"
+version = "1.1.0"
 description = "User Generated Form Component for NiceGUI Framework"
 authors = [
     {name = "Harry Huang",email = "harryhuang2652@qq.com"}
