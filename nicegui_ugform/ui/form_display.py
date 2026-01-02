@@ -104,7 +104,6 @@ class FormDisplay:
                             await self.on_submit()
                         else:
                             self.on_submit()
-                    ui.notify(self._t.formSubmittedSuccessfully, type="positive")
 
                 def reset_form():
                     """Resets the form to default values."""

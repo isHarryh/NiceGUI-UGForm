@@ -45,7 +45,6 @@ TRANSLATIONS = TranslationMap(
     newFieldTemplate="新建{0}字段",
     jsonSchemaCopied="JSON 模式已复制到剪贴板",
     base64SchemaCopied="Base64 模式已复制到剪贴板",
-    formSubmittedSuccessfully="表单提交成功",
     pleaseFixValidationErrors="请修复校验错误",
     formReset="表单已重置",
     fieldRequiredTemplate="{0}：此字段为必填项",

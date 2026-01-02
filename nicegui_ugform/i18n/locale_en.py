@@ -45,7 +45,6 @@ TRANSLATIONS = TranslationMap(
     newFieldTemplate="New {0} Field",
     jsonSchemaCopied="JSON schema copied to clipboard",
     base64SchemaCopied="Base64 schema copied to clipboard",
-    formSubmittedSuccessfully="Form submitted successfully",
     pleaseFixValidationErrors="Please fix validation errors",
     formReset="Form reset",
     fieldRequiredTemplate="{0}: This field is required",

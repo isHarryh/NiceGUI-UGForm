@@ -61,7 +61,6 @@ class TranslationMap(NamedTuple):
     # Notification messages
     jsonSchemaCopied: str
     base64SchemaCopied: str
-    formSubmittedSuccessfully: str
     pleaseFixValidationErrors: str
     formReset: str
     fieldRequiredTemplate: str
