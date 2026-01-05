@@ -47,6 +47,7 @@ TRANSLATIONS = TranslationMap(
     minValueGreaterThanMaxValue="最小值不能大于最大值",
     maxLengthLessThanMinLength="最大长度不能小于最小长度",
     maxValueLessThanMinValue="最大值不能小于最小值",
+    invalidRegexPattern="无效的正则表达式",
     newFieldTemplate="新建{0}字段",
     jsonSchemaCopied="JSON 模式已复制到剪贴板",
     base64SchemaCopied="Base64 模式已复制到剪贴板",

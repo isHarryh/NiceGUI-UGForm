@@ -47,6 +47,7 @@ TRANSLATIONS = TranslationMap(
     minValueGreaterThanMaxValue="Min value cannot be greater than max value",
     maxLengthLessThanMinLength="Max length cannot be less than min length",
     maxValueLessThanMinValue="Max value cannot be less than min value",
+    invalidRegexPattern="Invalid regex pattern",
     newFieldTemplate="New {0} Field",
     jsonSchemaCopied="JSON schema copied to clipboard",
     base64SchemaCopied="Base64 schema copied to clipboard",

@@ -61,6 +61,7 @@ class TranslationMap(NamedTuple):
     minValueGreaterThanMaxValue: str
     maxLengthLessThanMinLength: str
     maxValueLessThanMinValue: str
+    invalidRegexPattern: str
 
     # Template texts
     newFieldTemplate: str

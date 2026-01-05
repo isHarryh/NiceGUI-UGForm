@@ -2,6 +2,7 @@
 
 import copy
 import inspect
+import re
 from typing import Awaitable, Callable, NamedTuple, Optional, Union
 
 from nicegui import ui
@@ -326,10 +327,19 @@ class FormEditor:
                             ),
                         ).classes("flex-1")
 
+                    def validate_regex_pattern(pattern: Optional[str]) -> Optional[str]:
+                        if pattern is not None:
+                            try:
+                                re.compile(pattern)
+                            except re.error:
+                                return self._t.invalidRegexPattern
+                        return None
+
                     ui.input(
                         self._t.regexPattern,
                         value=field.regex or "",
                         on_change=lambda e, f=field: setattr(f, "regex", e.value or None),
+                        validation=lambda v: validate_regex_pattern(v),
                     ).classes("w-full")
 
                 elif isinstance(field, (IntegerField, FloatField)):
