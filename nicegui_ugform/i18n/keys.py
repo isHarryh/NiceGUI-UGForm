@@ -55,6 +55,9 @@ class TranslationMap(NamedTuple):
     tooSmallTemplate: str
     tooLargeTemplate: str
 
+    # Editor validation messages
+    lengthCannotBeNegative: str
+
     # Template texts
     newFieldTemplate: str
 

@@ -42,6 +42,7 @@ TRANSLATIONS = TranslationMap(
     regexPatternMismatch="Does not match the required pattern",
     tooSmallTemplate="Value too small (min value is {0})",
     tooLargeTemplate="Value too large (max value is {0})",
+    lengthCannotBeNegative="Length cannot be negative",
     newFieldTemplate="New {0} Field",
     jsonSchemaCopied="JSON schema copied to clipboard",
     base64SchemaCopied="Base64 schema copied to clipboard",

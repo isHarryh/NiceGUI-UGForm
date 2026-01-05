@@ -42,6 +42,7 @@ TRANSLATIONS = TranslationMap(
     regexPatternMismatch="不符合所需的模式",
     tooSmallTemplate="值太小（不应低于 {0}）",
     tooLargeTemplate="值太大（不应高于 {0}）",
+    lengthCannotBeNegative="长度不能为负数",
     newFieldTemplate="新建{0}字段",
     jsonSchemaCopied="JSON 模式已复制到剪贴板",
     base64SchemaCopied="Base64 模式已复制到剪贴板",
