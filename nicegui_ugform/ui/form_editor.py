@@ -292,14 +292,38 @@ class FormEditor:
                             self._t.minLength,
                             value=field.min_length,
                             on_change=lambda e, f=field: setattr(f, "min_length", int(e.value) if e.value else None),
-                            validation=lambda v: self._t.lengthCannotBeNegative if v is not None and v < 0 else None,
+                            validation=lambda v: (
+                                None
+                                if v is None
+                                else (
+                                    self._t.lengthCannotBeNegative
+                                    if v < 0
+                                    else (
+                                        self._t.minLengthGreaterThanMaxLength
+                                        if field.max_length is not None and v > field.max_length
+                                        else None
+                                    )
+                                )
+                            ),
                         ).classes("flex-1")
 
                         ui.number(
                             self._t.maxLength,
                             value=field.max_length,
                             on_change=lambda e, f=field: setattr(f, "max_length", int(e.value) if e.value else None),
-                            validation=lambda v: self._t.lengthCannotBeNegative if v is not None and v < 0 else None,
+                            validation=lambda v: (
+                                None
+                                if v is None
+                                else (
+                                    self._t.lengthCannotBeNegative
+                                    if v < 0
+                                    else (
+                                        self._t.maxLengthLessThanMinLength
+                                        if field.min_length is not None and v < field.min_length
+                                        else None
+                                    )
+                                )
+                            ),
                         ).classes("flex-1")
 
                     ui.input(
@@ -315,10 +339,20 @@ class FormEditor:
                             self._t.minValue,
                             value=field.min_value,
                             on_change=lambda e, f=field: setattr(f, "min_value", e.value),
+                            validation=lambda v, f=field: (
+                                self._t.minValueGreaterThanMaxValue
+                                if v is not None and f.max_value is not None and v > f.max_value
+                                else None
+                            ),
                         ).classes("flex-1")
 
                         ui.number(
                             self._t.maxValue,
                             value=field.max_value,
                             on_change=lambda e, f=field: setattr(f, "max_value", e.value),
+                            validation=lambda v, f=field: (
+                                self._t.maxValueLessThanMinValue
+                                if v is not None and f.min_value is not None and v < f.min_value
+                                else None
+                            ),
                         ).classes("flex-1")

@@ -57,6 +57,10 @@ class TranslationMap(NamedTuple):
 
     # Editor validation messages
     lengthCannotBeNegative: str
+    minLengthGreaterThanMaxLength: str
+    minValueGreaterThanMaxValue: str
+    maxLengthLessThanMinLength: str
+    maxValueLessThanMinValue: str
 
     # Template texts
     newFieldTemplate: str
