@@ -2,6 +2,12 @@
 
 All notable changes to NiceGUI-UGForm will be documented in this file.
 
+## v1.1.1 - 2026-01-05
+
+### Added
+- Add validation messages in `FormEditor` for min/max length and min/max value settings.
+- Add validation messages in `FormEditor` for regex pattern settings.
+
 ## v1.1.0 - 2026-01-02
 
 ### Added
